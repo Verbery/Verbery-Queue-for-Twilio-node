@@ -4,6 +4,7 @@
   "description": "Queueing functionality for Twilio as it should be",
   "main": "QueueManager.js",
   "scripts": {
+    "start": "node QueueManager.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
