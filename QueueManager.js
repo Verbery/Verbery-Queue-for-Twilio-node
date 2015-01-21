@@ -26,14 +26,14 @@ app.disable('x-powered-by');
 app.use(function (req, res, next) {
 
 	console.log("adding headers allow-origin");
-	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":80");
+	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":8080");
 
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 	next();
 });
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || 80,
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 server.listen(port);
