@@ -1,0 +1,30 @@
+{
+  "name": "Verbery-Queue-for-Twilio-nodejs",
+  "version": "0.0.1",
+  "description": "Queueing functionality for Twilio as it should be",
+  "main": "QueueManager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minaevd/Verbery-Queue-for-Twilio-nodejs.git"
+  },
+  "keywords": [
+    "twilio",
+    "queue"
+  ],
+  "author": "Dmitry Minaev",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/minaevd/Verbery-Queue-for-Twilio-nodejs/issues"
+  },
+  "dependencies": {
+    "twilio": "1.6.0",
+    "socket.io": "0.9.16",
+    "redis": "0.12.1",
+    "express": "4.1.0",
+    "compress": "0.1.9",
+    "compression": "1.0.2",
+    "formidable": "1.0.14"
+}

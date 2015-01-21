@@ -3,13 +3,13 @@
 // _open> agent_app.php
 
 // These vars are your accountSid and authToken from twilio.com/user/account
-var accountSid = "";
-var authToken = "";
+var accountSid = process.env.SID;
+var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 
 var express = require('express')
-	, app = express()
+    , app = express()
     , server = require('http').Server(app)
     , io = require('socket.io').listen(server)
     , compress = require('compression')()
@@ -26,14 +26,14 @@ app.disable('x-powered-by');
 app.use(function (req, res, next) {
 
 	console.log("adding headers allow-origin");
-	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":8080");
+	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":80");
 
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 	next();
 });
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || 8080,
+var port = process.env.OPENSHIFT_NODEJS_PORT || 80,
     ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 server.listen(port);
