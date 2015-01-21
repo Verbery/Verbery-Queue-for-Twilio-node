@@ -16,7 +16,7 @@ var express = require('express')
 ///////////////////////////////////////////
     , formidable = require('formidable')
     , redis = require('redis')
-    , credis = redis.createClient()
+    , credis = redis.createClient(6379, 'verbery.com', {})
 
 ////////////////////////////////////
 
