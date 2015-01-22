@@ -1,6 +1,20 @@
-// These vars are your accountSid and authToken from twilio.com/user/account
-var accountSid = process.env.SID;
-var authToken = process.env.TOKEN;
+/*
+ * SETUP environment vars for application in Heroku
+ * 
+ * Twilio SID and TOKEN can be found here: https://www.twilio.com/user/account/
+ * heroku config:set TWILIO_SID=Azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+ * heroku config:set TWILIO_TOKEN=Azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+ * 
+ * REDIS server host and port
+ * heroku config:set REDIS_HOST=verbery.com
+ * heroku config:set REDIS_PORT=6379
+ */
+
+/*
+ * These vars are your accountSid and authToken from twilio.com/user/account
+ */
+var accountSid = process.env.TWILIO_SID;
+var authToken = process.env.TWILIO_TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 var express = require('express');
@@ -8,7 +22,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
-var credis = redis.createClient(6379, 'verbery.com', {});
+var credis = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST, {});
 var compress = require('compression')();
 
 io.set('origins', '*:*');
@@ -34,8 +48,8 @@ io.sockets.on('connection', function(socket) {
 	/*
 	 * Event: register
 	 * 
-	 * Description: listen to each socket (agent) registered in the application
-	 * agent_app.php and connect agent to the queue if there are calls waiting
+	 * Description: listen to each socket (agent) registered in the agent php
+	 * application and connect agent to the queue if there are calls waiting
 	 */
 	socket.on('register', function(id) {
 
@@ -161,9 +175,9 @@ io.sockets.on('connection', function(socket) {
 	 * Event: missed queue call
 	 * 
 	 * Description: if agent didn't pickup/accept the incoming call presented
-	 * then agent_app.php emits 'missed queue call' event. We re-rank this agent
-	 * in the redis by removing and adding with a new timestamp. And then we try
-	 * to find the next agent with longest idle time.
+	 * then agent php application emits 'missed queue call' event. We re-rank
+	 * this agent in the redis by removing and adding with a new timestamp. And
+	 * then we try to find the next agent with longest idle time.
 	 */
 	socket.on("missed queue call", function(queueID) {
 
