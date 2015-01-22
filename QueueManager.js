@@ -8,9 +8,9 @@ var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 
-// var express = require('express')
-//    , app = express()
-var server = require('http').Server(app)
+var express = require('express')
+    , app = express()
+    , server = require('http').Server(app)
     , io = require('socket.io').listen(server)
     , compress = require('compression')()
 ///////////////////////////////////////////
@@ -20,24 +20,24 @@ var server = require('http').Server(app)
 
 ////////////////////////////////////
 
-// app.use(compress);
-// app.disable('x-powered-by');
+app.use(compress);
+app.disable('x-powered-by');
 
-// app.use(function (req, res, next) {
-//
-//	console.log("adding headers allow-origin");
-//	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":5000");
-//
-//	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-//	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-//	next();
-//});
+app.use(function (req, res, next) {
+
+	console.log("adding headers allow-origin");
+	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":5000");
+
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+	next();
+});
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
     ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 server.listen(port);
-//console.log(ip+':'port);
+console.log("Server is running on "+ip+':'port);
 ////////////////////////////////////
 
 

@@ -4,8 +4,10 @@
   "description": "Queueing functionality for Twilio as it should be",
   "main": "QueueManager.js",
   "scripts": {
-    "start": "node QueueManager.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node QueueManager.js"
+  },
+  "engines": {
+      "node": "0.10.x"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
     "twilio": "1.6.0",
     "socket.io": "0.9.16",
     "redis": "0.12.1",
+    "express": "4.1.0",
+    "compress": "0.1.9",
     "compression": "1.0.2"
   }
 }
