@@ -4,15 +4,17 @@ var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 var express = require('express');
-var cors = require('cors');
+//var cors = require('cors');
 var app = express();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server, {origins: "*:*"});
+var io = require('socket.io')(server);
 var redis = require('redis');
 var credis = redis.createClient(6379, 'verbery.com', {});
 var compress = require('compression')();
 
-app.use(cors());
+io.set('origins', '*:*');
+
+//app.use(cors());
 app.use(compress);
 app.disable('x-powered-by');
 
