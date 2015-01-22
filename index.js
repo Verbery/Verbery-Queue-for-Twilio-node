@@ -4,7 +4,6 @@ var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 var express = require('express');
-//var cors = require('cors');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
@@ -14,66 +13,83 @@ var compress = require('compression')();
 
 io.set('origins', '*:*');
 
-//app.use(cors());
 app.use(compress);
 app.disable('x-powered-by');
 
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
 
 	console.log("adding headers allow-origin");
 	res.setHeader('Access-Control-Allow-Origin', "*:*");
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+	res.setHeader('Access-Control-Allow-Methods',
+			'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Headers',
+			'X-Requested-With,content-type');
 	next();
 });
 
+io.sockets.on('connection', function(socket) {
 
-// io.on('connection', function(){ /* … */ });
-io.sockets.on('connection', function (socket) {
+	console.log("got connection from socket " + socket.id);
 
-	console.log("got connection from socket "+socket.id);
-
-	// register each socket with id
-	socket.on('register', function (id) {
+	/*
+	 * Event: register
+	 * 
+	 * Description: listen to each socket (agent) registered in the application
+	 * agent_app.php and connect agent to the queue if there are calls waiting
+	 */
+	socket.on('register', function(id) {
 
 		var curdate = (new Date).getTime();
-		console.log(curdate+": got register event from client with id = "+id + ". Socket id: " + socket.id);
+		console.log(curdate + ": got register event from client with id = "
+				+ id + ". Socket id: " + socket.id);
 
-		// send ready signal to notify agent that (s)he is able to accept calls
-		console.log("new client (id="+id+") logged in at " + curdate + ". Socket id: " + socket.id);
-    	socket.emit('ready');
+		/*
+		 * send ready signal to notify agent that (s)he is able to accept calls
+		 */
+		console.log("new client (id=" + id + ") logged in at " + curdate
+				+ ". Socket id: " + socket.id);
+		socket.emit('ready');
 
-//    	// DEMO ONLY: notify index page
-//    	socket.broadcast.emit('agent_login', id);
-
-		// add agent to the sorted list to be able to easily get the agent with greatest idle time
+		/*
+		 * add agent to the redis sorted list to be able to easily get the agent
+		 * with greatest idle time
+		 */
 		var ags = [ 'agents_set', curdate, socket.id ];
-		credis.zadd( ags, function (err, response) {
-		    console.log('saved agent in the redis sorted list: socketID='+socket.id+' ts='+curdate);
-		    if (err) throw err;
+		credis.zadd(ags, function(err, response) {
+			console.log('saved agent in the redis sorted list: socketID='
+					+ socket.id + ' ts=' + curdate);
+			if (err)
+				throw err;
 		});
 
-		// if there are any queues with size > 0
-		// find the queue with highest average wait time
+		/*
+		 * if there are any queues with size > 0 find the queue with highest
+		 * average wait time
+		 */
 		console.log('going to find queue with max idle time...');
 
 		twilio.queues.list(function(err, data) {
 
-			if (err) throw err;
+			if (err)
+				throw err;
 
 			var maxWaitTime = 0;
 			var queue_max = '';
 			var qcnt = 0;
 
-			console.log('There are '+ data.queues.length +' queues, looping...');
+			console.log('There are ' + data.queues.length
+					+ ' queues, looping...');
 
 			data.queues.forEach(function(queue) {
 
-				console.log('Looping through queues: '+ queue.friendlyName +', sid: '+ queue.sid +', size: '+ queue.currentSize +', average wait time: '+ queue.averageWaitTime);
+				console.log('Looping through queues: ' + queue.friendlyName
+						+ ', sid: ' + queue.sid + ', size: '
+						+ queue.currentSize + ', average wait time: '
+						+ queue.averageWaitTime);
 
-				if(queue.currentSize != 0) {
+				if (queue.currentSize != 0) {
 
-					if(queue.averageWaitTime > maxWaitTime) {
+					if (queue.averageWaitTime > maxWaitTime) {
 
 						console.log('Found queue with max idle time');
 						maxWaitTime = queue.averageWaitTime;
@@ -83,101 +99,139 @@ io.sockets.on('connection', function (socket) {
 				}
 			});
 
-			console.log('There are '+ qcnt +' active queues, maximum wait time is '+ maxWaitTime +' in queue '+ queue_max);
-			// and send request to agent to pick a call from this queue
-			if(maxWaitTime > 0) {
-				io.sockets.connected[socket.id].emit('call to queue', queue_max );
+			console.log('There are ' + qcnt
+					+ ' active queues, maximum wait time is ' + maxWaitTime
+					+ ' in queue ' + queue_max);
+
+			/*
+			 * Send request to agent to pick a call from the found queue
+			 */
+			if (maxWaitTime > 0) {
+				io.sockets.connected[socket.id]
+						.emit('call to queue', queue_max);
 			}
 		});
 	});
 
-	socket.on('deregister', function (id) {
-
-		// remove agent from redis
-		// that means we won't be able to pick this agent to
-		// assign to a queue call
+	/*
+	 * Event: Deregister event.
+	 * 
+	 * Description: if agent gone offline or oncall, deregister the agent's
+	 * station/socket, remove socket id from redis
+	 */
+	socket.on('deregister', function(id) {
 
 		var ags = [ 'agents_set', socket.id ];
-		credis.zrem(ags, function (err, response) {
-			console.log('removed an agent from redis sorted list: socketID='+socket.id);
-			if (err) throw err;
+		credis.zrem(ags, function(err, response) {
+			console.log('removed an agent from redis sorted list: socketID='
+					+ socket.id);
+			if (err)
+				throw err;
 		});
 	});
 
-//	// Promote this socket as master
-//	socket.on("register master socket", function() {
-//
-//		// Save the socket id to Redis so that all processes can access it.
-//	    credis.set("mastersocket", socket.id, function(err) {
-//	      if (err) throw err;
-//	      console.log("Master socket is now" + socket.id);
-//	    });
-//	});
-
-	socket.on("from master, new call in queue", function(queueID) {
+	/*
+	 * Event: incoming call in queue
+	 * 
+	 * Description: listen on new incoming call in queue event emitted from
+	 * caller.php. Find agent with longest idle time and return agent`s socket
+	 */
+	socket.on("incoming call in queue", function(queueID) {
 
 		console.log("got new call in queue " + queueID + " from " + socket.id);
 
-		// find agent with longest idle time and return agent`s socket
 		var agent_id;
 		var ags = [ 'agents_set', '+inf', '-inf' ];
-		credis.zrevrangebyscore( ags, function (err, response) {
-			if (err) throw err;
+		credis.zrevrangebyscore(ags, function(err, response) {
+			if (err)
+				throw err;
 
 			console.log('error occured: ', err);
-			agent_id = response[response.length-1];
-			console.log('get agent with longest idle time from agents_set: ', agent_id);
+			agent_id = response[response.length - 1];
 
-			if(agent_id != 'undefined') {
-				console.log('agent_id is not undefined');
-				io.sockets.connected[agent_id].emit('call to queue', queueID );
-				console.log('emitted call to queue');
-			}
-	    });
+			console.log('get agent with longest idle time from agents_set: ',
+					agent_id);
+
+			if (agent_id != 'undefined')
+				io.sockets.connected[agent_id].emit('call to queue', queueID);
+		});
 	});
 
+	/*
+	 * Event: missed queue call
+	 * 
+	 * Description: if agent didn't pickup/accept the incoming call presented
+	 * then agent_app.php emits 'missed queue call' event. We re-rank this agent
+	 * in the redis by removing and adding with a new timestamp. And then we try
+	 * to find the next agent with longest idle time.
+	 */
 	socket.on("missed queue call", function(queueID) {
 
-		console.log("got message that agent missed call in queue " + queueID + "; Agent: " + socket.id);
+		console.log("got message that agent missed call in queue " + queueID
+				+ "; Agent: " + socket.id);
 
 		var curdate = (new Date).getTime();
 
-		// update (remove and then add) agent`s idle start time with curdate in redis
-		// remove
+		/*
+		 * remove agent from redis
+		 */
 		var ags = [ 'agents_set', socket.id ];
-		credis.zrem(ags, function (err, response) {
-			console.log('removed an agent from redis sorted list: socketID='+socket.id);
-			if (err) throw err;
-		});
-		// add
-		ags = [ 'agents_set', curdate, socket.id ];
-		credis.zadd( ags, function (err, response) {
-		    console.log('saved agent in the redis sorted list: socketID='+socket.id+' ts='+curdate);
-		    if (err) throw err;
+		credis.zrem(ags, function(err, response) {
+			if (err)
+				throw err;
+
+			console.log('removed an agent from redis sorted list: socketID='
+					+ socket.id);
 		});
 
-		// find agent with longest idle time and return agent`s socket
+		/*
+		 * add agent to redis with a new (current) timestamp
+		 */
+		ags = [ 'agents_set', curdate, socket.id ];
+		credis.zadd(ags, function(err, response) {
+			if (err)
+				thro1w
+			err;
+
+			console.log('saved agent in the redis sorted list: socketID='
+					+ socket.id + ' ts=' + curdate);
+		});
+
+		/*
+		 * find agent with longest idle time and return agent`s socket
+		 */
 		var agent_id;
 		var ags = [ 'agents_set', '+inf', '-inf' ];
-		credis.zrevrangebyscore( ags, function (err, response) {
-			if (err) throw err;
+		credis.zrevrangebyscore(ags, function(err, response) {
+			if (err)
+				throw err;
 
-	        agent_id = response[response.length-1];
-			console.log('get agent with longest idle time from agents_set: ', agent_id);
+			agent_id = response[response.length - 1];
+			console.log('get agent with longest idle time from agents_set: ',
+					agent_id);
 
-			if(agent_id != 'undefined')
-				io.sockets.connected[agent_id].emit('call to queue', queueID );
-	    });
+			if (agent_id != 'undefined')
+				io.sockets.connected[agent_id].emit('call to queue', queueID);
+		});
 	});
 
-	socket.on('disconnect', function () {
+	/*
+	 * Event: disconnect
+	 * 
+	 * Description: if agent closed the application (browser window), then
+	 * remove the socket from redis
+	 */
+	socket.on('disconnect', function() {
 
-		console.log('agent '+ socket.id +' disconnected');
+		console.log('agent ' + socket.id + ' disconnected');
 
 		var ags = [ 'agents_set', socket.id ];
-		credis.zrem(ags, function (err, response) {
-			console.log('removed an agent from redis sorted list: socketID='+socket.id);
-			if (err) throw err;
+		credis.zrem(ags, function(err, response) {
+			if (err)
+				throw err;
+
+			console.log('removed an agent from redis sorted list: socketID='
+					+ socket.id);
 		});
 	});
 
@@ -188,14 +242,19 @@ function findAgent_and_sendNotification() {
 	// find agent with longest idle time and return agent`s socket
 	var agent_id;
 	var ags = [ 'agents_set', '+inf', '-inf' ];
-	credis.zrevrangebyscore( ags, function (err, response) {
-		if (err) throw err;
+	credis.zrevrangebyscore(ags, function(err, response) {
+		if (err)
+			throw err;
 
-		console.log('get agent with longest idle time from agents_set: ', response[response.length-1]);
+		console.log('get agent with longest idle time from agents_set: ',
+				response[response.length - 1]);
 
-        agent_id = response[response.length-1];
-    });
+		agent_id = response[response.length - 1];
+	});
 	return agent_id;
 }
 
+/*
+ * setup server to listen on connections, the heroku approved way of doing this
+ */
 server.listen(process.env.PORT || 5000);
