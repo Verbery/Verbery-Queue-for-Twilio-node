@@ -37,7 +37,7 @@ var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
     ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 server.listen(port);
-console.log("Server is running on "+ip+':'port);
+console.log("Server is running on "+ip+':'+port);
 ////////////////////////////////////
 
 
