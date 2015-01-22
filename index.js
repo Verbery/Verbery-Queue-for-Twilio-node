@@ -1,24 +1,14 @@
-// start> redis-server
-// start> node manage_call_queues.js
-// _open> agent_app.php
-
 // These vars are your accountSid and authToken from twilio.com/user/account
 var accountSid = process.env.SID;
 var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
-
-var express = require('express')
-    , app = express()
-    , server = require('http').Server(app)
-    , io = require('socket.io').listen(server, { origins: '*:*' })
-    , compress = require('compression')()
-///////////////////////////////////////////
-    , formidable = require('formidable')
-    , redis = require('redis')
-    , credis = redis.createClient(6379, 'verbery.com', {})
-
-////////////////////////////////////
+var app = require('express')();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server, {origins: "*:*"});
+var redis = require('redis');
+var credis = redis.createClient(6379, 'verbery.com', {});
+var compress = require('compression')();
 
 app.use(compress);
 app.disable('x-powered-by');
@@ -32,15 +22,8 @@ app.use(function (req, res, next) {
 	next();
 });
 
-// var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
-//    ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
-//
-// server.listen(port);
-server.listen(process.env.PORT || 5000)
-// console.log("Server is running on "+ip+':'+port);
-////////////////////////////////////
 
-
+// io.on('connection', function(){ /* … */ });
 io.sockets.on('connection', function (socket) {
 
 	console.log("got connection from socket "+socket.id);
@@ -208,3 +191,5 @@ function findAgent_and_sendNotification() {
     });
 	return agent_id;
 }
+
+server.listen(process.env.PORT || 5000);

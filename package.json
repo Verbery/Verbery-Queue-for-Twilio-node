@@ -2,9 +2,9 @@
   "name": "Verbery-Queue-for-Twilio-nodejs",
   "version": "0.0.1",
   "description": "Queueing functionality for Twilio as it should be",
-  "main": "QueueManager.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node QueueManager.js"
+    "start": "node index.js"
   },
   "engines": {
       "node": "0.10.x"
@@ -28,6 +28,5 @@
     "redis": "0.12.1",
     "express": "4.1.0",
     "compression": "1.0.2",
-    "formidable": "1.0.14"
   }
 }
