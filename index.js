@@ -119,19 +119,19 @@ io.sockets.on('connection', function (socket) {
 		console.log("got new call in queue " + queueID + " from " + socket.id);
 
 		// find agent with longest idle time and return agent`s socket
-//		var sid = findAgent_and_sendNotification();
-
-		// find agent with longest idle time and return agent`s socket
 		var agent_id;
 		var ags = [ 'agents_set', '+inf', '-inf' ];
 		credis.zrevrangebyscore( ags, function (err, response) {
 			if (err) throw err;
 
+			console.log('error occured: ', err);
 			agent_id = response[response.length-1];
 			console.log('get agent with longest idle time from agents_set: ', agent_id);
 
-			if(agent_id != 'undefined')
+			if(agent_id != 'undefined') {
+				console.log('agent_id is not undefined');
 				io.sockets.socket(agent_id).emit('call to queue', queueID );
+			}
 	    });
 	});
 
