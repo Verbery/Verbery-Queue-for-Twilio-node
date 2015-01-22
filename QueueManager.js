@@ -8,32 +8,32 @@ var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
 
-var express = require('express')
-    , app = express()
-    , server = require('http').Server(app)
+// var express = require('express')
+//    , app = express()
+var server = require('http').Server(app)
     , io = require('socket.io').listen(server)
     , compress = require('compression')()
 ///////////////////////////////////////////
-    , formidable = require('formidable')
+//    , formidable = require('formidable')
     , redis = require('redis')
     , credis = redis.createClient(6379, 'verbery.com', {})
 
 ////////////////////////////////////
 
-app.use(compress);
-app.disable('x-powered-by');
+// app.use(compress);
+// app.disable('x-powered-by');
 
-app.use(function (req, res, next) {
+// app.use(function (req, res, next) {
+//
+//	console.log("adding headers allow-origin");
+//	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":5000");
+//
+//	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+//	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+//	next();
+//});
 
-	console.log("adding headers allow-origin");
-	res.setHeader('Access-Control-Allow-Origin', "http://"+req.headers.host+":8080");
-
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-	next();
-});
-
-var port = process.env.OPENSHIFT_NODEJS_PORT || 8080,
+var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
     ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 
 server.listen(port);
