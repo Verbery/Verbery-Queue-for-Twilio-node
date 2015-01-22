@@ -136,10 +136,11 @@ io.sockets.on('connection', function(socket) {
 
 		var ags = [ 'agents_set', socket.id ];
 		credis.zrem(ags, function(err, response) {
-			console.log('removed an agent from redis sorted list: socketID='
-					+ socket.id);
 			if (err)
 				throw err;
+
+			console.log('removed an agent from redis sorted list: socketID='
+					+ socket.id);
 		});
 	});
 
@@ -159,7 +160,6 @@ io.sockets.on('connection', function(socket) {
 			if (err)
 				throw err;
 
-			console.log('error occured: ', err);
 			agent_id = response[response.length - 1];
 
 			console.log('get agent with longest idle time from agents_set: ',
