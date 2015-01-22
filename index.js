@@ -86,7 +86,7 @@ io.sockets.on('connection', function (socket) {
 			console.log('There are '+ qcnt +' active queues, maximum wait time is '+ maxWaitTime +' in queue '+ queue_max);
 			// and send request to agent to pick a call from this queue
 			if(maxWaitTime > 0) {
-				io.sockets.socket(socket.id).emit('call to queue', queue_max );
+				io.sockets.connected[socket.id].emit('call to queue', queue_max );
 			}
 		});
 	});
@@ -130,7 +130,6 @@ io.sockets.on('connection', function (socket) {
 
 			if(agent_id != 'undefined') {
 				console.log('agent_id is not undefined');
-//				io.sockets.socket(agent_id).emit('call to queue', queueID );
 				io.sockets.connected[agent_id].emit('call to queue', queueID );
 				console.log('emitted call to queue');
 			}
@@ -167,7 +166,7 @@ io.sockets.on('connection', function (socket) {
 			console.log('get agent with longest idle time from agents_set: ', agent_id);
 
 			if(agent_id != 'undefined')
-				io.sockets.socket(agent_id).emit('call to queue', queueID );
+				io.sockets.connected[agent_id].emit('call to queue', queueID );
 	    });
 	});
 
