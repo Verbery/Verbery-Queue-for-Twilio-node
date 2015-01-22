@@ -3,13 +3,16 @@ var accountSid = process.env.SID;
 var authToken = process.env.TOKEN;
 var twilio = require('twilio')(accountSid, authToken);
 
-var app = require('express')();
+var express = require('express');
+var cors = require('cors');
+var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server, {origins: "*:*"});
 var redis = require('redis');
 var credis = redis.createClient(6379, 'verbery.com', {});
 var compress = require('compression')();
 
+app.use(cors());
 app.use(compress);
 app.disable('x-powered-by');
 
