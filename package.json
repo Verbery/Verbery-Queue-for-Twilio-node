@@ -1,5 +1,5 @@
 {
-  "name": "Verbery-Queue-for-Twilio-nodejs",
+  "name": "Verbery-Queue-for-Twilio-node",
   "version": "0.0.1",
   "description": "Queueing functionality for Twilio as it should be",
   "main": "index.js",
