@@ -27,7 +27,6 @@
     "socket.io": "0.9.16",
     "redis": "0.12.1",
     "express": "4.1.0",
-    "compress": "0.1.9",
     "compression": "1.0.2"
   }
 }
