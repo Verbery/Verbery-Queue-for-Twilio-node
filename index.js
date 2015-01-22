@@ -130,7 +130,9 @@ io.sockets.on('connection', function (socket) {
 
 			if(agent_id != 'undefined') {
 				console.log('agent_id is not undefined');
-				io.sockets.socket(agent_id).emit('call to queue', queueID );
+//				io.sockets.socket(agent_id).emit('call to queue', queueID );
+				io.sockets.connected[agent_id].emit('call to queue', queueID );
+				console.log('emitted call to queue');
 			}
 	    });
 	});
