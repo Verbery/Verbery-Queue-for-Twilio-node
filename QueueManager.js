@@ -11,7 +11,7 @@ var twilio = require('twilio')(accountSid, authToken);
 var express = require('express')
     , app = express()
     , server = require('http').Server(app)
-    , io = require('socket.io').listen(server, {origins:'verbery-queue-for-twilio-php.herokuapp.com/:* http://http://verbery-queue-for-twilio-php.herokuapp.com/:* http://www.http://verbery-queue-for-twilio-php.herokuapp.com/:*'})
+    , io = require('socket.io').listen(server, { origins: '*:*' })
     , compress = require('compression')()
 ///////////////////////////////////////////
     , formidable = require('formidable')
