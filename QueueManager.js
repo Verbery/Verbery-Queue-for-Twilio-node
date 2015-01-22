@@ -14,7 +14,7 @@ var express = require('express')
     , io = require('socket.io').listen(server)
     , compress = require('compression')()
 ///////////////////////////////////////////
-//    , formidable = require('formidable')
+    , formidable = require('formidable')
     , redis = require('redis')
     , credis = redis.createClient(6379, 'verbery.com', {})
 
@@ -33,10 +33,11 @@ app.use(function (req, res, next) {
 	next();
 });
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
-    ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
-
-server.listen(port);
+// var port = process.env.OPENSHIFT_NODEJS_PORT || 5000,
+//    ip = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+//
+// server.listen(port);
+server.listen(process.env.PORT || 5000)
 console.log("Server is running on "+ip+':'+port);
 ////////////////////////////////////
 
