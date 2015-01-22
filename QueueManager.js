@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 //
 // server.listen(port);
 server.listen(process.env.PORT || 5000)
-console.log("Server is running on "+ip+':'+port);
+// console.log("Server is running on "+ip+':'+port);
 ////////////////////////////////////
 
 
