@@ -4,10 +4,6 @@
  * Twilio SID and TOKEN can be found here: https://www.twilio.com/user/account/
  * heroku config:set TWILIO_SID=Azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
  * heroku config:set TWILIO_TOKEN=Azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
- * 
- * REDIS server host and port
- * heroku config:set REDIS_HOST=verbery.com
- * heroku config:set REDIS_PORT=6379
  */
 
 /*
@@ -22,7 +18,9 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
-var credis = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST, {});
+var redisURL = url.parse(process.env.REDISCLOUD_URL);
+var credis = redis.createClient(redisURL.port, redisURL.hostname, {no_ready_check: true});
+client.auth(redisURL.auth.split(":")[1]);
 var compress = require('compression')();
 
 io.set('origins', '*:*');
